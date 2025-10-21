@@ -1,0 +1,129 @@
+# 💳 Referenced Payments API
+
+API REST para la gestión de **referencias de pago**, desarrollada con **Spring Boot 3.5.6**, **Java 17** y **PostgreSQL**.
+Incluye autenticación **JWT**, pruebas unitarias con **JUnit/Mockito** y soporte para ejecución en **Docker**.
+
+---
+
+## 🚀 Características principales
+
+- Autenticación segura con JWT (`/authenticate`)
+- CRUD completo de referencias de pago (`/referencedpayments/references`)
+- Persistencia en PostgreSQL
+- Pruebas unitarias y de controladores
+- Configuración lista para ejecución en Docker
+- Compatible con Gradle y Java 17
+
+---
+
+## ⚙️ Requisitos previos
+
+- **Java 17**
+- **Gradle** (o usar el wrapper `./gradlew`)
+- **Docker Desktop** (opcional, para ejecutar con contenedor)
+- **PostgreSQL** (local o vía Docker)
+
+---
+
+## 🗄️ Configuración de base de datos
+
+Este servicio usa **PostgreSQL** como base de datos principal.
+Puedes ejecutar una instancia local o usar Docker.
+
+### 🔹 Opción 1 — Base de datos en Docker
+
+Ejecuta el siguiente comando desde la raíz del proyecto:
+
+docker-compose up --build
+
+
+### 👤 Usuario inicial para autenticación
+
+Antes de iniciar la API, crea el usuario **admin** para poder generar tokens JWT.
+
+Ejecuta en tu base de datos PostgreSQL:
+
+```sql
+INSERT INTO users (id, username, password, role)
+VALUES (1, 'admin', '$2a$10$y4JGVByR76/yduFxf5EBS.g/e4HOlWO9VZxk01iM2gyX5TA/Houg2', 'ADMIN');
+
+🔐 Contraseña: 123456
+
+
+### ▶️ Ejecución local
+   ./gradlew clean build
+
+La API estará disponible en:
+👉 http://localhost:8080
+
+### 🧠 Autenticación JWT
+
+Genera un token enviando una petición `POST` a `/authenticate`:
+
+**Request body:**
+```json
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+Copia el valor del campo jwt y úsalo en las siguientes peticiones agregando el encabezado:
+
+Authorization: Bearer <token>
+
+---
+
+### 📡 Endpoints principales
+
+    | **Método** | **Endpoint** | **Descripción** |
+    |-------------|--------------|-----------------|
+    | `GET` | `/health` | Verifica el estado de la API |
+    | `POST` | `/authenticate` | Genera un token JWT |
+    | `POST` | `/referencedpayments/references` | Crea una nueva referencia |
+    | `GET` | `/referencedpayments/references` | Lista todas las referencias |
+    | `GET` | `/referencedpayments/references/{id}` | Consulta una referencia por ID |
+    | `PUT` | `/referencedpayments/references/{id}` | Actualiza una referencia |
+    | `DELETE` | `/referencedpayments/references/{id}` | Elimina una referencia |
+
+---
+## 🐳 Ejecución con Docker
+
+Asegúrate de tener Docker Desktop activo, y desde la raíz del proyecto ejecuta:
+
+docker-compose up --build
+
+Esto levantará tanto la API como la base de datos PostgreSQL.
+
+---
+
+## 📬 Postman Collection
+
+La colección de pruebas se encuentra en:
+
+/postman/ReferencedPaymentsAPI.postman_collection.json
+
+Contiene:
+
+Autenticación /authenticate
+
+Health check /health
+
+CRUD de referencias de pago
+
+Importa el archivo en Postman y prueba todos los endpoints fácilmente 🚀
+
+--
+
+## 📄 Licencia
+
+Este proyecto fue desarrollado con fines educativos y de práctica profesional.
+© 2025 - Referenced Payments API
+
+--
+
+## 💡 Autor
+
+Jeimmy Liliana Rache Camargo
+Desarrolladora Backend - Java | Spring Boot
+📧 Contacto: https://github.com/LilianaRache
+

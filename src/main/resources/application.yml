@@ -1,0 +1,28 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/referenced_payments
+    username: pagos_user
+    password: pagos_pass
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  application:
+    name: referenced-payments-api
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+
+server:
+  port: 8080
+
+jwt:
+  secret: mysecretkey1234567890
+  expiration: 86400000  # 24h en milisegundos
+
+
+
