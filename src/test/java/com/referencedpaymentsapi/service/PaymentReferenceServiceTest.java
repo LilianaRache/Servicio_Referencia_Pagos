@@ -1,6 +1,7 @@
 package com.referencedpaymentsapi.service;
 
 import com.referencedpaymentsapi.enums.PaymentStatus;
+import com.referencedpaymentsapi.model.dto.PaymentCancelRequest;
 import com.referencedpaymentsapi.model.entity.PaymentReference;
 import com.referencedpaymentsapi.repository.PaymentReferenceRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,104 +12,141 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+
 class PaymentReferenceServiceTest {
 
-    @Mock
     private PaymentReferenceRepository repository;
-
-    @InjectMocks
     private PaymentReferenceService service;
 
-    private PaymentReference reference;
+    private PaymentReference entity;
 
     @BeforeEach
-    void setUp() {
-        reference = new PaymentReference();
-        reference.setId(1L);
-        reference.setAmount(BigDecimal.valueOf(100));
-        reference.setCurrency("USD");
-        reference.setDescription("Test payment");
-        reference.setStatus(PaymentStatus.CREATED);
+    void setup() {
+        repository = mock(PaymentReferenceRepository.class);
+        service = new PaymentReferenceService(repository);
+
+        entity = new PaymentReference();
+        entity.setPaymentId(1L);
+        entity.setAmount(new BigDecimal("100.00"));
+        entity.setDescription("Pago de prueba");
+        entity.setReference("REF1234567890ABCDEFGHIJKLM");
+        entity.setDueDate(LocalDateTime.of(2024,10,30,12,0));
+        entity.setCreationDate(LocalDateTime.of(2024,10,22,10,0));
+        entity.setStatus(PaymentStatus.CREATED.getCode());
+        entity.setCallBackURL("https://callback.test");
     }
 
     @Test
-    void testCreateShouldGenerateReferenceNumberAndSave() {
-        when(repository.save(any(PaymentReference.class))).thenAnswer(i -> i.getArgument(0));
+    void create_shouldSaveAndGenerateReference() {
+        when(repository.save(any(PaymentReference.class))).thenReturn(entity);
 
-        PaymentReference saved = service.create(reference);
+        PaymentReference saved = service.create(entity);
 
-        assertNotNull(saved.getReferenceNumber());
-        assertTrue(saved.getReferenceNumber().startsWith("REF-"));
-        verify(repository, times(1)).save(any(PaymentReference.class));
+        assertNotNull(saved);
+        assertEquals(entity.getAmount(), saved.getAmount());
+        assertEquals(entity.getDescription(), saved.getDescription());
+        assertEquals(entity.getCallBackURL(), saved.getCallBackURL());
+        assertNotNull(saved.getReference());
+        assertEquals(30, saved.getReference().length());
+        verify(repository, times(1)).save(entity);
     }
 
     @Test
-    void testFindAllReturnsList() {
-        when(repository.findAll()).thenReturn(List.of(reference));
+    void findAll_shouldReturnList() {
+        when(repository.findAll()).thenReturn(Arrays.asList(entity));
 
-        List<PaymentReference> result = service.findAll();
+        List<PaymentReference> list = service.findAll();
 
-        assertEquals(1, result.size());
-        assertEquals("USD", result.get(0).getCurrency());
+        assertEquals(1, list.size());
+        assertEquals(entity.getPaymentId(), list.get(0).getPaymentId());
         verify(repository, times(1)).findAll();
     }
 
     @Test
-    void testFindByIdFound() {
-        when(repository.findById(1L)).thenReturn(Optional.of(reference));
+    void findByPaymentIdAndReference_shouldReturnOptional() {
+        when(repository.findByPaymentIdAndReference(1L, "REF1234567890ABCDEFGHIJKLM"))
+                .thenReturn(Optional.of(entity));
+
+        Optional<PaymentReference> result = service.findByPaymentIdAndReference("REF1234567890ABCDEFGHIJKLM", 1L);
+
+        assertTrue(result.isPresent());
+        assertEquals(entity.getPaymentId(), result.get().getPaymentId());
+        verify(repository, times(1)).findByPaymentIdAndReference(1L, "REF1234567890ABCDEFGHIJKLM");
+    }
+
+    @Test
+    void findByCreationDate_shouldReturnList() {
+        LocalDateTime start = LocalDateTime.of(2024,10,21,0,0);
+        LocalDateTime end = LocalDateTime.of(2024,10,31,23,59);
+        when(repository.findByCreationDateBetween(start, end)).thenReturn(Arrays.asList(entity));
+
+        List<PaymentReference> list = service.findByCreationDate(start, end);
+
+        assertEquals(1, list.size());
+        verify(repository, times(1)).findByCreationDateBetween(start, end);
+    }
+
+    @Test
+    void findById_shouldReturnOptional() {
+        when(repository.findById(1L)).thenReturn(Optional.of(entity));
 
         Optional<PaymentReference> result = service.findById(1L);
 
         assertTrue(result.isPresent());
-        assertEquals("USD", result.get().getCurrency());
-        verify(repository).findById(1L);
+        assertEquals(entity.getPaymentId(), result.get().getPaymentId());
+        verify(repository, times(1)).findById(1L);
     }
 
     @Test
-    void testFindByIdNotFound() {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
+    void update_shouldCancelPayment() {
+        PaymentCancelRequest request = new PaymentCancelRequest();
+        request.setReference(entity.getReference());
+        request.setStatus("03");
+        request.setUpdateDescription("Pago cancelado");
 
-        Optional<PaymentReference> result = service.findById(99L);
+        when(repository.findByReference(entity.getReference())).thenReturn(Optional.of(entity));
+        when(repository.save(any(PaymentReference.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        assertFalse(result.isPresent());
+        PaymentReference updated = service.update(request);
+
+        assertEquals(PaymentStatus.CANCELED.getCode(), updated.getStatus());
+        assertEquals("Pago cancelado", updated.getDescription());
+        verify(repository, times(1)).findByReference(entity.getReference());
+        verify(repository, times(1)).save(entity);
     }
 
     @Test
-    void testUpdateExisting() {
-        PaymentReference updated = new PaymentReference();
-        updated.setAmount(BigDecimal.valueOf(200));
-        updated.setDescription("Updated desc");
-        updated.setStatus(PaymentStatus.CANCELED);
+    void update_shouldThrowIfStatusNotCreated() {
+        entity.setStatus(PaymentStatus.PAID.getCode());
+        PaymentCancelRequest request = new PaymentCancelRequest();
+        request.setReference(entity.getReference());
+        request.setStatus("03");
+        request.setUpdateDescription("Intento cancelación");
 
-        when(repository.findById(1L)).thenReturn(Optional.of(reference));
-        when(repository.save(any(PaymentReference.class))).thenAnswer(i -> i.getArgument(0));
+        when(repository.findByReference(entity.getReference())).thenReturn(Optional.of(entity));
 
-        //TODO: Adjust the update
-        PaymentReference result = service.update(1L, updated);
-
-        assertEquals(BigDecimal.valueOf(200), result.getAmount());
-        assertEquals("EUR", result.getCurrency());
-        assertEquals(PaymentStatus.PAID, result.getStatus());
-        verify(repository).save(reference);
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.update(request));
+        assertEquals("Solo se puede cancelar un pago con estado '01' (Created)", ex.getMessage());
     }
 
     @Test
-    void testUpdateNotFoundThrowsException() {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
-        assertThrows(RuntimeException.class, () -> service.update(99L, reference));
-    }
+    void update_shouldThrowIfReferenceNotFound() {
+        PaymentCancelRequest request = new PaymentCancelRequest();
+        request.setReference("NO_EXISTE");
+        request.setStatus("03");
+        request.setUpdateDescription("Cancelación");
 
-    @Test
-    void testDelete() {
-        doNothing().when(repository).deleteById(1L);
-        service.delete(1L);
-        verify(repository).deleteById(1L);
+        when(repository.findByReference("NO_EXISTE")).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> service.update(request));
+        assertEquals("Referencia no encontrada", ex.getMessage());
     }
 }

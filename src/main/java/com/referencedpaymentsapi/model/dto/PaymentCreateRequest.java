@@ -24,7 +24,7 @@ public class PaymentCreateRequest {
     @Size(max = 255, message = "La descripción no puede superar los 255 caracteres")
     private String description;
 
-    @NotBlank(message = "La fecha de vencimiento (dueDate) es obligatoria")
+    @NotBlank(message = "La fecha de vencimiento (dueDate) es obligatoria con formato yyyy-MM-ddTHH:mm:ss")
     private String dueDate;
 
     @NotBlank(message = "El callbackURL es obligatorio")

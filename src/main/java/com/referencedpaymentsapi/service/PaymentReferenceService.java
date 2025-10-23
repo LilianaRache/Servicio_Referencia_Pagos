@@ -55,11 +55,11 @@ public class PaymentReferenceService {
         PaymentReference existing = paymentReferenceRepository.findByReference(request.getReference())
                 .orElseThrow(() -> new RuntimeException("Referencia no encontrada"));
 
-        if (!existing.getStatus().equals(PaymentStatus.CREATED)) {
+        if (!existing.getStatus().equals(PaymentStatus.CREATED.getCode())) {
             throw new RuntimeException("Solo se puede cancelar un pago con estado '01' (Created)");
         }
 
-        existing.setStatus(PaymentStatus.CANCELED);
+        existing.setStatus(PaymentStatus.CANCELED.getCode());
         existing.setDescription(request.getUpdateDescription());
 
         return paymentReferenceRepository.save(existing);

@@ -22,7 +22,7 @@ public class PaymentReferenceMapper {
         entity.setDescription(request.getDescription());
         entity.setDueDate(LocalDateTime.parse(request.getDueDate()));
         entity.setCreationDate(LocalDateTime.now());
-        entity.setStatus(PaymentStatus.CREATED);
+        entity.setStatus(PaymentStatus.CREATED.getCode());
         entity.setCallBackURL(request.getCallbackURL());
         return entity;
     }
@@ -34,7 +34,7 @@ public class PaymentReferenceMapper {
         response.setAmount(entity.getAmount());
         response.setDescription(entity.getDescription());
         response.setCreationDate(LocalDateTime.now());
-        response.setStatus(entity.getStatus().name());
+        response.setStatus(entity.getStatus());
         response.setMessage("Payment created successfully");
         return response;
     }
@@ -46,7 +46,7 @@ public class PaymentReferenceMapper {
         response.setReference(entity.getReference());
         response.setDescription(entity.getDescription());
         response.setDueDate(entity.getDueDate());
-        response.setStatus(String.valueOf(PaymentStatus.PAID));
+        response.setStatus(entity.getStatus());
         response.setCallBackURL(entity.getCallBackURL());
         response.setCallbackACKID(entity.getCallbackACKID());
         response.setCancelDescription(entity.getCancelDescription());
@@ -67,8 +67,5 @@ public class PaymentReferenceMapper {
         response.setUpdatedAt(LocalDateTime.now());
         return response;
     }
-
-
-
 
 }

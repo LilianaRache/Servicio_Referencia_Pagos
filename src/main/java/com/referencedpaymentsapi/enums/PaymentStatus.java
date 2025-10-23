@@ -15,6 +15,10 @@ public enum PaymentStatus {
 
     private final String code;
 
+    public String getCode() {
+        return code;
+    }
+
     public static PaymentStatus fromCode(String code) {
         for (PaymentStatus status : PaymentStatus.values()) {
             if (status.code.equals(code)) {

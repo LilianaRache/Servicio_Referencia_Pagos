@@ -7,6 +7,7 @@ import com.referencedpaymentsapi.model.entity.PaymentReference;
 import com.referencedpaymentsapi.service.PaymentReferenceService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,13 +15,14 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
  * Controlador REST para gestionar las referencias de pago.
  */
 @RestController
-@RequestMapping("/v1/")
+@RequestMapping("/v1")
 public class PaymentReferenceController {
 
     private final PaymentReferenceService service;
@@ -43,13 +45,17 @@ public class PaymentReferenceController {
     }
 
     @GetMapping("/payment/{reference}/{paymentId}")
-    public ResponseEntity<ApiResponse<PaymentReferenceResponse>> findById(@PathVariable String reference, Long paymentId ) {
-        PaymentReferenceResponse paymentReference = service.findByPaymentIdAndReference(reference,paymentId)
-                .map(mapper::toResponse)
-                .orElseThrow(() -> new RuntimeException("PaymentReference not found"));
+    public ResponseEntity<ApiResponse<PaymentReferenceResponse>> findById(@PathVariable String reference, @PathVariable Long paymentId ) {
+        Optional<PaymentReferenceResponse> optResponse = service.findByPaymentIdAndReference(reference, paymentId)
+                .map(mapper::toResponse);
+
+        if (optResponse.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse<>("404", "PaymentReference not found", null));
+        }
 
         ApiResponse<PaymentReferenceResponse> response = new ApiResponse<>(
-                "200", "Payment verified successfully", paymentReference);
+                    "200", "Payment verified successfully", optResponse.get());
 
         return ResponseEntity.ok(response);
     }

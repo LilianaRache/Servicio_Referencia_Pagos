@@ -56,7 +56,7 @@ public class AuthController {
         AuthResponse response = new AuthResponse(token, String.valueOf(LocalDateTime.now()));
 
         ApiResponse<AuthResponse> apiResponse = new ApiResponse<>(
-                "200", "Autenticación exitosa", response );
+                "200", "Authentication successful", response );
         return ResponseEntity.ok(apiResponse);
     }
 

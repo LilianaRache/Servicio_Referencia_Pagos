@@ -48,7 +48,7 @@ public class WebSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/referencedpayments/authenticate", "/referencedpayments/health")
+                        .requestMatchers("/v1/authenticate", "/v1/health")
                         .permitAll()
                         .anyRequest().authenticated()
                 )

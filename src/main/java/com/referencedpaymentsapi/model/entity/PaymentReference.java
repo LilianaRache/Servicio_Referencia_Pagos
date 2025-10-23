@@ -38,7 +38,7 @@ public class PaymentReference {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 2)
-    private PaymentStatus status; // CREATED, PAID, CANCELED
+    private String status; // CREATED, PAID, CANCELED
 
     @Column(nullable = false)
     private String callBackURL; // viene del front
