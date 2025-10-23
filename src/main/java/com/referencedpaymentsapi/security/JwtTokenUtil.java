@@ -15,7 +15,7 @@ import java.util.function.Function;
 public class JwtTokenUtil {
 
     private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    private static final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 hora
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24; // 24 horas
 
     /**
      * Genera un token JWT para un usuario

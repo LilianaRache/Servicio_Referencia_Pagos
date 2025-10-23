@@ -12,11 +12,16 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 public class PaymentReferenceResponse {
-    private Long id;
-    private String referenceNumber;
+
+    private Long paymentId;
     private BigDecimal amount;
-    private String currency;
+    private String reference;
     private String description;
+    private LocalDateTime dueDate;
     private String status;
-    private LocalDateTime createdAt;
+    private String callBackURL;
+    private String callbackACKID;
+    private String cancelDescription;
+    private String authorizationNumber;
+    private LocalDateTime paymentDate;
 }

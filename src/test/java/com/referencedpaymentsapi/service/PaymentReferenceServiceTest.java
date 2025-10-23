@@ -35,7 +35,7 @@ class PaymentReferenceServiceTest {
         reference.setAmount(BigDecimal.valueOf(100));
         reference.setCurrency("USD");
         reference.setDescription("Test payment");
-        reference.setStatus(PaymentStatus.PENDING);
+        reference.setStatus(PaymentStatus.CREATED);
     }
 
     @Test
@@ -84,18 +84,18 @@ class PaymentReferenceServiceTest {
     void testUpdateExisting() {
         PaymentReference updated = new PaymentReference();
         updated.setAmount(BigDecimal.valueOf(200));
-        updated.setCurrency("EUR");
         updated.setDescription("Updated desc");
-        updated.setStatus(PaymentStatus.COMPLETED);
+        updated.setStatus(PaymentStatus.CANCELED);
 
         when(repository.findById(1L)).thenReturn(Optional.of(reference));
         when(repository.save(any(PaymentReference.class))).thenAnswer(i -> i.getArgument(0));
 
+        //TODO: Adjust the update
         PaymentReference result = service.update(1L, updated);
 
         assertEquals(BigDecimal.valueOf(200), result.getAmount());
         assertEquals("EUR", result.getCurrency());
-        assertEquals(PaymentStatus.COMPLETED, result.getStatus());
+        assertEquals(PaymentStatus.PAID, result.getStatus());
         verify(repository).save(reference);
     }
 

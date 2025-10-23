@@ -11,17 +11,23 @@ import java.math.BigDecimal;
  */
 @Getter
 @Setter
-public class PaymentReferenceRequest {
+public class PaymentCreateRequest {
+
+    @NotBlank(message = "El externalId es obligatorio")
+    private String externalId;
 
     @NotNull(message = "El monto es obligatorio")
     @DecimalMin(value = "0.0", inclusive = false, message = "El monto debe ser mayor que cero")
     private BigDecimal amount;
 
-    @NotBlank(message = "La moneda es obligatoria")
-    @Size(min = 3, max = 3, message = "La moneda debe tener 3 caracteres (por ejemplo, USD, COP, EUR)")
-    private String currency;
-
     @NotBlank(message = "La descripción es obligatoria")
     @Size(max = 255, message = "La descripción no puede superar los 255 caracteres")
     private String description;
+
+    @NotBlank(message = "La fecha de vencimiento (dueDate) es obligatoria")
+    private String dueDate;
+
+    @NotBlank(message = "El callbackURL es obligatorio")
+    @Pattern(regexp = "^(https?|ftp)://[^\\s/$.?#].[^\\s]*$", message = "El callbackURL debe ser una URL válida")
+    private String callbackURL;
 }

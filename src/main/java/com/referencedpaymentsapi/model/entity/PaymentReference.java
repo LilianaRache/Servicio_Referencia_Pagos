@@ -19,25 +19,36 @@ public class PaymentReference {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, unique = true)
-    private String referenceNumber;
+    private Long paymentId;
 
     @Column(nullable = false)
-    private BigDecimal amount;
+    private BigDecimal amount; // viene del front
 
-    @Column(nullable = false, length = 3)
-    private String currency;
+    @Column(nullable = false, unique = true, length = 50)
+    private String reference; // autogenerado
 
-    private String description;
-
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PaymentStatus status = PaymentStatus.PENDING;
+    private String description; // viene del front
+
+    @Column(nullable = false)
+    private LocalDateTime dueDate; // viene del front
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime creationDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 2)
+    private PaymentStatus status; // CREATED, PAID, CANCELED
+
+    @Column(nullable = false)
+    private String callBackURL; // viene del front
+
+    private String callbackACKID = ""; // en blanco
+
+    private String cancelDescription = ""; // en blanco
+
+    private String authorizationNumber = ""; // en blanco
+
+    private LocalDateTime paymentDate; // en blanco al crearse
 
 }

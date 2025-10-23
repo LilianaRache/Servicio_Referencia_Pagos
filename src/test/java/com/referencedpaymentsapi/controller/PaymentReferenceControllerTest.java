@@ -4,8 +4,8 @@ package com.referencedpaymentsapi.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.referencedpaymentsapi.enums.PaymentStatus;
 import com.referencedpaymentsapi.mapper.PaymentReferenceMapper;
-import com.referencedpaymentsapi.model.dto.PaymentReferenceRequest;
-import com.referencedpaymentsapi.model.dto.PaymentReferenceResponse;
+import com.referencedpaymentsapi.model.dto.PaymentCreateRequest;
+import com.referencedpaymentsapi.model.dto.PaymentCreateResponse;
 import com.referencedpaymentsapi.model.entity.PaymentReference;
 import com.referencedpaymentsapi.service.PaymentReferenceService;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,8 +48,8 @@ class PaymentReferenceControllerTest {
     private ObjectMapper objectMapper;
 
     private PaymentReference entity;
-    private PaymentReferenceRequest request;
-    private PaymentReferenceResponse response;
+    private PaymentCreateRequest request;
+    private PaymentCreateResponse response;
 
     @BeforeEach
     void setup() {
@@ -65,28 +65,28 @@ class PaymentReferenceControllerTest {
         entity.setAmount(new BigDecimal("1500.00"));
         entity.setCurrency("USD");
         entity.setDescription("Pago de prueba");
-        entity.setStatus(PaymentStatus.PENDING);
+        entity.setStatus(PaymentStatus.CREATED);
         entity.setCreatedAt(LocalDateTime.now());
 
-        request = new PaymentReferenceRequest();
+        request = new PaymentCreateRequest();
         request.setAmount(new BigDecimal("1500.00"));
         request.setCurrency("USD");
         request.setDescription("Pago de prueba");
 
-        response = new PaymentReferenceResponse();
+        response = new PaymentCreateResponse();
         response.setId(1L);
         response.setReferenceNumber("REF12345");
         response.setAmount(new BigDecimal("1500.00"));
         response.setCurrency("USD");
         response.setDescription("Pago de prueba");
-        response.setStatus(String.valueOf(PaymentStatus.PENDING));
+        response.setStatus(String.valueOf(PaymentStatus.CREATED));
         response.setCreatedAt(entity.getCreatedAt());
     }
 
     @Test
     void create_shouldReturnOk() throws Exception {
 
-        Mockito.when(mapper.toEntity(any(PaymentReferenceRequest.class))).thenReturn(entity);
+        Mockito.when(mapper.toEntity(any(PaymentCreateRequest.class))).thenReturn(entity);
         Mockito.when(service.create(any(PaymentReference.class))).thenReturn(entity);
         Mockito.when(mapper.toResponse(any(PaymentReference.class))).thenReturn(response);
 
@@ -136,7 +136,7 @@ class PaymentReferenceControllerTest {
 
     @Test
     void update_shouldReturnUpdated() throws Exception {
-        Mockito.when(mapper.toEntity(any(PaymentReferenceRequest.class))).thenReturn(entity);
+        Mockito.when(mapper.toEntity(any(PaymentCreateRequest.class))).thenReturn(entity);
         Mockito.when(service.update(eq(1L), any(PaymentReference.class))).thenReturn(entity);
         Mockito.when(mapper.toResponse(entity)).thenReturn(response);
 

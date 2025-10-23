@@ -1,7 +1,9 @@
 package com.referencedpaymentsapi.controller;
 
 
+import com.referencedpaymentsapi.model.dto.ApiResponse;
 import com.referencedpaymentsapi.model.dto.AuthRequest;
+import com.referencedpaymentsapi.model.dto.AuthResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,11 +14,12 @@ import org.springframework.security.authentication.*;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/referencedpayments")
+@RequestMapping("/v1")
 public class AuthController {
 
     /**
@@ -37,7 +40,7 @@ public class AuthController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception {
+    public ResponseEntity<ApiResponse<AuthResponse>> createAuthenticationToken(@RequestBody AuthRequest authRequest) throws Exception {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
@@ -49,9 +52,12 @@ public class AuthController {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getUsername());
         final String token = jwtTokenUtil.generateToken(userDetails);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("token", token);
-        return ResponseEntity.ok(response);
+
+        AuthResponse response = new AuthResponse(token, String.valueOf(LocalDateTime.now()));
+
+        ApiResponse<AuthResponse> apiResponse = new ApiResponse<>(
+                "200", "Autenticación exitosa", response );
+        return ResponseEntity.ok(apiResponse);
     }
 
 
