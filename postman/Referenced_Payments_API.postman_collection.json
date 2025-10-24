@@ -1,0 +1,249 @@
+{
+	"info": {
+		"_postman_id": "126891a3-8f28-4fb8-bf43-b8e1c0b63ec1",
+		"name": "Referenced_Payments_API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6746633",
+		"_collection_link": "https://galactic-sunset-788710.postman.co/workspace/Masiv~a855a013-90cd-4036-8520-05d5e398ad40/collection/6746633-126891a3-8f28-4fb8-bf43-b8e1c0b63ec1?action=share&source=collection_link&creator=6746633"
+	},
+	"item": [
+		{
+			"name": "Health",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"customerId\": 1,\r\n    \"items\": [\r\n        {\r\n            \"productId\": 1001,\r\n            \"quantity\": 2,\r\n            \"price\": 25.5\r\n        }\r\n    ]\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"health"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Authenticate",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"admin\",\r\n  \"password\": \"123456\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/authenticate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"authenticate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create_Payments_References",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"externalId\": \"123\",\r\n    \"amount\": 100.0,\r\n    \"description\":\"Payment description\",\r\n    \"dueDate\": \"2025-10-30T11:59:00\",\r\n    \"callbackURL\":\"https://myurl/callback\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/payment",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"payment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get_All_References",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/v1/payments/search?startCreationDate=2024-10-11T00:00:00&endCreationDate=2025-10-31T23:59:59&status=03",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"payments",
+						"search"
+					],
+					"query": [
+						{
+							"key": "startCreationDate",
+							"value": "2024-10-11T00:00:00"
+						},
+						{
+							"key": "endCreationDate",
+							"value": "2025-10-31T23:59:59"
+						},
+						{
+							"key": "status",
+							"value": "03"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Especific_Reference",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8080/v1/payment/24102025004210082UJHOGGO3PVA64/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"payment",
+						"24102025004210082UJHOGGO3PVA64",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update_Reference",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"amount\": 250000,\r\n    \"currency\": \"COP\",\r\n    \"description\": \"Pago de matrícula actualizado\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/referencedpayments/references/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"referencedpayments",
+						"references",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete_Reference",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"reference\": \"241020250052422675IQGYYWIG21X0\",\n    \"status\": \"03\",\n    \"updateDescription\": \"Mensaje de cancelacion\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/v1/payment/cancel",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"payment",
+						"cancel"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

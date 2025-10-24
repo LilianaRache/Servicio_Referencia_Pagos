@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface PaymentReferenceRepository extends JpaRepository<PaymentReference, Long> {
     Optional<PaymentReference> findByPaymentIdAndReference(Long paymentId, String reference);
-    List<PaymentReference> findByCreationDateBetween(LocalDateTime startDate, LocalDateTime endDate);
+    List<PaymentReference> findByCreationDateBetweenAndStatus(LocalDateTime startDate, LocalDateTime endDate, String status);
     Optional<PaymentReference> findByReference(String reference);
 
 }

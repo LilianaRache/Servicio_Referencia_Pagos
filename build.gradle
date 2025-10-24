@@ -43,6 +43,7 @@ dependencies {
     // Utilidades
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    implementation 'com.itextpdf:itextpdf:5.5.13.3'
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -2,7 +2,6 @@ package com.referencedpaymentsapi.service;
 
 import com.referencedpaymentsapi.enums.PaymentStatus;
 import com.referencedpaymentsapi.model.dto.PaymentCancelRequest;
-import com.referencedpaymentsapi.model.dto.PaymentUpdateResponse;
 import com.referencedpaymentsapi.model.entity.PaymentReference;
 import com.referencedpaymentsapi.repository.PaymentReferenceRepository;
 import org.springframework.stereotype.Service;
@@ -12,7 +11,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Servicio que gestiona la lógica de negocio para las referencias de pago.
@@ -42,8 +40,8 @@ public class PaymentReferenceService {
         return paymentReferenceRepository.findByPaymentIdAndReference(id, reference);
     }
 
-    public List<PaymentReference> findByCreationDate(LocalDateTime startDate, LocalDateTime endDate) {
-        return paymentReferenceRepository.findByCreationDateBetween(startDate, endDate);
+    public List<PaymentReference> findByCreationDateBetweenAndStatus(LocalDateTime startDate, LocalDateTime endDate, String status) {
+        return paymentReferenceRepository.findByCreationDateBetweenAndStatus(startDate, endDate, status);
     }
 
     public Optional<PaymentReference> findById(Long id) {
@@ -60,11 +58,11 @@ public class PaymentReferenceService {
         }
 
         existing.setStatus(PaymentStatus.CANCELED.getCode());
-        existing.setDescription(request.getUpdateDescription());
+        existing.setCancelDescription(request.getUpdateDescription());
 
         return paymentReferenceRepository.save(existing);
     }
-    
+
 
     /**
      * Genera una referencia de 30 caracteres exactos:

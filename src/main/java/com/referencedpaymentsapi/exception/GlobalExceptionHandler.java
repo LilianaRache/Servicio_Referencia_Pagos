@@ -1,5 +1,7 @@
 package com.referencedpaymentsapi.exception;
 
+import com.referencedpaymentsapi.model.dto.ApiResponse;
+import com.referencedpaymentsapi.enums.ResponseCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -8,7 +10,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,54 +17,56 @@ import java.util.Map;
  * Maneja de forma global todas las excepciones de la aplicación.
  * Devuelve respuestas claras y estructuradas.
  */
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     /**
-     * Captura errores de validación (anotaciones @Valid en los DTOs)
+     * Maneja errores de validación (DTOs con @Valid)
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
-
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
+
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            errors.put(fieldName, error.getDefaultMessage());
         });
 
-        body.put("errors", errors);
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        ApiResponse<Map<String, String>> response = new ApiResponse<>(
+                ResponseCode.INVALID_REQUEST.getCode(),
+                ResponseCode.INVALID_REQUEST.getMessage(),
+                errors
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     /**
-     * Captura excepciones de tipo IllegalArgumentException o personalizadas
+     * Maneja errores de negocio (por ejemplo IllegalArgumentException)
      */
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Object> handleIllegalArgument(IllegalArgumentException ex, WebRequest request) {
-        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    public ResponseEntity<ApiResponse<Object>> handleIllegalArgument(IllegalArgumentException ex) {
+        ApiResponse<Object> response = new ApiResponse<>(
+                ResponseCode.CREATION_FAILED.getCode(),
+                ex.getMessage(), // mensaje específico del negocio
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
     }
 
     /**
-     * Captura cualquier excepción general no manejada.
+     * Maneja errores inesperados
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleGlobalException(Exception ex, WebRequest request) {
-        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Error interno del servidor: " + ex.getMessage());
-    }
+    public ResponseEntity<ApiResponse<Object>> handleGlobalException(Exception ex, WebRequest request) {
+        ApiResponse<Object> response = new ApiResponse<>(
+                ResponseCode.INTERNAL_ERROR.getCode(),
+                ResponseCode.INTERNAL_ERROR.getMessage() + ": " + ex.getMessage(),
+                null
+        );
 
-    /**
-     * Método de utilidad para construir respuestas de error uniformes.
-     */
-    private ResponseEntity<Object> buildErrorResponse(HttpStatus status, String message) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", status.value());
-        body.put("error", status.getReasonPhrase());
-        body.put("message", message);
-        return new ResponseEntity<>(body, status);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }

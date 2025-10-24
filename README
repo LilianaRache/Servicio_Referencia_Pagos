@@ -8,7 +8,7 @@ Incluye autenticación **JWT**, pruebas unitarias con **JUnit/Mockito** y soport
 ## 🚀 Características principales
 
 - Autenticación segura con JWT (`/authenticate`)
-- CRUD completo de referencias de pago (`/referencedpayments/references`)
+- CRUD completo de referencias de pago (`/v1/authenticate`)
 - Persistencia en PostgreSQL
 - Pruebas unitarias y de controladores
 - Configuración lista para ejecución en Docker
@@ -79,11 +79,11 @@ Authorization: Bearer <token>
     |-------------|--------------|-----------------|
     | `GET` | `/health` | Verifica el estado de la API |
     | `POST` | `/authenticate` | Genera un token JWT |
-    | `POST` | `/referencedpayments/references` | Crea una nueva referencia |
-    | `GET` | `/referencedpayments/references` | Lista todas las referencias |
-    | `GET` | `/referencedpayments/references/{id}` | Consulta una referencia por ID |
-    | `PUT` | `/referencedpayments/references/{id}` | Actualiza una referencia |
-    | `DELETE` | `/referencedpayments/references/{id}` | Elimina una referencia |
+    | `POST` | `/v1/payment` | Crea una nueva referencia |
+    | `GET` | `/v1/payments/search?startCreationDate={{start_date}}&endCreationDate={{end_date}}&status={{status}}| Lista todas las referencias |
+    | `GET` | `/vi/payment/{referenceId}/{paymentId}` | Consulta una referencia por ID |
+    | `PUT` | `/v1/payment/cancel` | Actualiza una referencia |
+
 
 ---
 ## 🐳 Ejecución con Docker

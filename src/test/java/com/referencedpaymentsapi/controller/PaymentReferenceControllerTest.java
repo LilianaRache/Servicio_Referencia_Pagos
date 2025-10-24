@@ -7,6 +7,7 @@ import com.referencedpaymentsapi.mapper.PaymentReferenceMapper;
 import com.referencedpaymentsapi.model.dto.*;
 import com.referencedpaymentsapi.model.entity.PaymentReference;
 import com.referencedpaymentsapi.service.PaymentReferenceService;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -24,9 +25,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -149,14 +148,15 @@ class PaymentReferenceControllerTest {
         response.setStatus(PaymentStatus.CREATED.getCode());
 
         List<PaymentReference> list = Arrays.asList(entity);
-        Mockito.when(service.findByCreationDate(fixedDate, fixedDate.plusDays(10))).thenReturn(list);
+        Mockito.when(service.findByCreationDateBetweenAndStatus(fixedDate, fixedDate.plusDays(10), response.getStatus())).thenReturn(list);
         Mockito.when(mapper.toResponse(entity)).thenReturn(response);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
         mockMvc.perform(get("/v1/payments/search")
                         .param("startCreationDate", fixedDate.format(formatter))
-                        .param("endCreationDate", fixedDate.plusDays(10).format(formatter)))
+                        .param("endCreationDate", fixedDate.plusDays(10).format(formatter))
+                        .param("status", "01"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data[0].reference").value("REF12345"))
                 .andExpect(jsonPath("$.data[0].amount").value(1500.00))
@@ -201,10 +201,9 @@ class PaymentReferenceControllerTest {
     void downloadPdf_shouldReturnPdfBytes() throws Exception {
         Mockito.when(service.findById(1L)).thenReturn(Optional.of(entity));
 
-        mockMvc.perform(get("/v1/1/pdf"))
+        mockMvc.perform(get("/v1/payment/1/pdf"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Disposition", "form-data; name=\"attachment\"; filename=\"comprobante_1.pdf\""))
+                .andExpect(header().string("Content-Disposition", "attachment; filename=\"comprobante_1.pdf\""))
                 .andExpect(content().contentType("application/pdf"));
-
     }
 }

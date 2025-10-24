@@ -1,6 +1,7 @@
 package com.referencedpaymentsapi.controller;
 
 
+import com.itextpdf.text.DocumentException;
 import com.referencedpaymentsapi.mapper.PaymentReferenceMapper;
 import com.referencedpaymentsapi.model.dto.*;
 import com.referencedpaymentsapi.model.entity.PaymentReference;
@@ -12,11 +13,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.io.ByteArrayOutputStream;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 
 /**
  * Controlador REST para gestionar las referencias de pago.
@@ -45,7 +52,7 @@ public class PaymentReferenceController {
     }
 
     @GetMapping("/payment/{reference}/{paymentId}")
-    public ResponseEntity<ApiResponse<PaymentReferenceResponse>> findById(@PathVariable String reference, @PathVariable Long paymentId ) {
+    public ResponseEntity<ApiResponse<PaymentReferenceResponse>> findById(@PathVariable String reference, @PathVariable Long paymentId) {
         Optional<PaymentReferenceResponse> optResponse = service.findByPaymentIdAndReference(reference, paymentId)
                 .map(mapper::toResponse);
 
@@ -55,7 +62,7 @@ public class PaymentReferenceController {
         }
 
         ApiResponse<PaymentReferenceResponse> response = new ApiResponse<>(
-                    "200", "Payment verified successfully", optResponse.get());
+                "200", "Payment verified successfully", optResponse.get());
 
         return ResponseEntity.ok(response);
     }
@@ -65,13 +72,14 @@ public class PaymentReferenceController {
     @RequestMapping("/payments/search")
     public ResponseEntity<ApiResponse<List<PaymentReferenceResponse>>> findAll(
             @RequestParam("startCreationDate") String startCreationDate,
-            @RequestParam("endCreationDate") String endCreationDate){
+            @RequestParam("endCreationDate") String endCreationDate,
+            @RequestParam("status") String status) {
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDateTime start = LocalDateTime.parse(startCreationDate, formatter);
         LocalDateTime end = LocalDateTime.parse(endCreationDate, formatter);
 
-        List<PaymentReferenceResponse> paymentReferences = service.findByCreationDate(start, end).stream()
+        List<PaymentReferenceResponse> paymentReferences = service.findByCreationDateBetweenAndStatus(start, end, status).stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
 
@@ -83,7 +91,7 @@ public class PaymentReferenceController {
 
 
     @PutMapping("/payment/cancel")
-    public ResponseEntity<ApiResponse<PaymentUpdateResponse>> update( @Valid @RequestBody PaymentCancelRequest request) {
+    public ResponseEntity<ApiResponse<PaymentUpdateResponse>> update(@Valid @RequestBody PaymentCancelRequest request) {
 
         PaymentReference updatedEntity = service.update(request);
         PaymentUpdateResponse updatedResponse = mapper.toResponseUpdate(updatedEntity);
@@ -98,29 +106,45 @@ public class PaymentReferenceController {
     }
 
 
-    @GetMapping("/{id}/pdf")
-    public ResponseEntity<byte[]> downloadPdf(@PathVariable Long id) {
+    @GetMapping("/payment/{id}/pdf")
+    public ResponseEntity<byte[]> downloadPdf(@PathVariable Long id) throws DocumentException {
         PaymentReference reference = service.findById(id)
                 .orElseThrow(() -> new RuntimeException("Referencia no encontrada"));
 
-        // 🧾 Generar contenido del PDF (aquí simulado con texto simple)
-        String pdfContent = "Comprobante de Pago\n\n" +
-                "Referencia: " + reference.getReference() + "\n" +
-                "Monto: " + reference.getAmount() + "\n" +
-                "Descripción: " + reference.getDescription() + "\n" +
-                "Estado: " + reference.getStatus() + "\n" +
-                "Fecha de vencimiento: " + reference.getDueDate() + "\n";
+        try {
+            // 🧾 Crear el PDF en memoria
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            Document document = new Document();
+            PdfWriter.getInstance(document, out);
+            document.open();
 
+            // 🖋️ Contenido del PDF
+            document.add(new Paragraph("Comprobante de Pago"));
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph("Referencia: " + reference.getReference()));
+            document.add(new Paragraph("Monto: " + reference.getAmount()));
+            document.add(new Paragraph("Descripción: " + reference.getDescription()));
+            document.add(new Paragraph("Estado: " + reference.getStatus()));
+            document.add(new Paragraph("Fecha de vencimiento: " + reference.getDueDate()));
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph("Gracias por usar nuestro servicio."));
 
-        // Convertir a bytes (luego se puede reemplazar con un PDF real)
-        byte[] pdfBytes = pdfContent.getBytes();
+            document.close();
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData("attachment", "comprobante_" + reference.getPaymentId() + ".pdf");
+            // 📦 Convertir a bytes
+            byte[] pdfBytes = out.toByteArray();
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(pdfBytes);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"comprobante_" + reference.getPaymentId() + ".pdf\"");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfBytes);
+        } catch (DocumentException e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
+
 }

@@ -86,12 +86,12 @@ class PaymentReferenceServiceTest {
     void findByCreationDate_shouldReturnList() {
         LocalDateTime start = LocalDateTime.of(2024,10,21,0,0);
         LocalDateTime end = LocalDateTime.of(2024,10,31,23,59);
-        when(repository.findByCreationDateBetween(start, end)).thenReturn(Arrays.asList(entity));
+        when(repository.findByCreationDateBetweenAndStatus(start, end, entity.getStatus())).thenReturn(Arrays.asList(entity));
 
-        List<PaymentReference> list = service.findByCreationDate(start, end);
+        List<PaymentReference> list = service.findByCreationDateBetweenAndStatus(start, end, entity.getStatus());
 
         assertEquals(1, list.size());
-        verify(repository, times(1)).findByCreationDateBetween(start, end);
+        verify(repository, times(1)).findByCreationDateBetweenAndStatus(start, end, entity.getStatus());
     }
 
     @Test
@@ -118,10 +118,11 @@ class PaymentReferenceServiceTest {
         PaymentReference updated = service.update(request);
 
         assertEquals(PaymentStatus.CANCELED.getCode(), updated.getStatus());
-        assertEquals("Pago cancelado", updated.getDescription());
+        assertEquals("Pago cancelado", updated.getCancelDescription());
         verify(repository, times(1)).findByReference(entity.getReference());
         verify(repository, times(1)).save(entity);
     }
+
 
     @Test
     void update_shouldThrowIfStatusNotCreated() {
