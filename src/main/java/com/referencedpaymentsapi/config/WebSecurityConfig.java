@@ -2,7 +2,6 @@ package com.referencedpaymentsapi.config;
 
 import com.referencedpaymentsapi.security.JwtAuthenticationFilter;
 import com.referencedpaymentsapi.service.JwtUserDetailsService;
-import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -47,22 +46,6 @@ public class WebSecurityConfig {
         return provider;
     }
 
-    /*@Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authenticationProvider(authenticationProvider())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v1/authenticate", "/v1/health")
-                        .permitAll()
-                        .anyRequest().authenticated()
-                )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }*/
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
@@ -70,7 +53,8 @@ public class WebSecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 👈 habilita CORS global
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/v1/authenticate", "/v1/health")
+                        .requestMatchers("/v1/authenticate", "/v1/health", "/v3/api-docs/**",
+                                "/swagger-ui/**")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
@@ -80,7 +64,8 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-    // ⚙️ Configuración CORS global (para Angular)
+
+    // Configuración CORS global (para Angular)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

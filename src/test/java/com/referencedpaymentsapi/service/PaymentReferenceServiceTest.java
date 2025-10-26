@@ -6,10 +6,6 @@ import com.referencedpaymentsapi.model.entity.PaymentReference;
 import com.referencedpaymentsapi.repository.PaymentReferenceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -38,8 +34,8 @@ class PaymentReferenceServiceTest {
         entity.setAmount(new BigDecimal("100.00"));
         entity.setDescription("Pago de prueba");
         entity.setReference("REF1234567890ABCDEFGHIJKLM");
-        entity.setDueDate(LocalDateTime.of(2024,10,30,12,0));
-        entity.setCreationDate(LocalDateTime.of(2024,10,22,10,0));
+        entity.setDueDate(LocalDateTime.of(2024, 10, 30, 12, 0));
+        entity.setCreationDate(LocalDateTime.of(2024, 10, 22, 10, 0));
         entity.setStatus(PaymentStatus.CREATED.getCode());
         entity.setCallBackURL("https://callback.test");
     }
@@ -84,8 +80,8 @@ class PaymentReferenceServiceTest {
 
     @Test
     void findByCreationDate_shouldReturnList() {
-        LocalDateTime start = LocalDateTime.of(2024,10,21,0,0);
-        LocalDateTime end = LocalDateTime.of(2024,10,31,23,59);
+        LocalDateTime start = LocalDateTime.of(2024, 10, 21, 0, 0);
+        LocalDateTime end = LocalDateTime.of(2024, 10, 31, 23, 59);
         when(repository.findByCreationDateBetweenAndStatus(start, end, entity.getStatus())).thenReturn(Arrays.asList(entity));
 
         List<PaymentReference> list = service.findByCreationDateBetweenAndStatus(start, end, entity.getStatus());

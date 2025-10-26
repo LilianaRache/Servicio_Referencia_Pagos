@@ -1,11 +1,16 @@
 package com.referencedpaymentsapi.controller;
 
 
+import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.referencedpaymentsapi.mapper.PaymentReferenceMapper;
 import com.referencedpaymentsapi.model.dto.*;
 import com.referencedpaymentsapi.model.entity.PaymentReference;
 import com.referencedpaymentsapi.service.PaymentReferenceService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,21 +18,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
+import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.io.ByteArrayOutputStream;
-
-import com.itextpdf.text.Document;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfWriter;
 
 /**
  * Controlador REST para gestionar las referencias de pago.
  */
+
+@Tag(name = "💳 Referencias de Pago", description = "Endpoints para crear, consultar, listar y cancelar referencias de pago.")
 @RestController
 @RequestMapping("/v1")
 public class PaymentReferenceController {
@@ -40,8 +42,11 @@ public class PaymentReferenceController {
         this.mapper = mapper;
     }
 
-    @PostMapping
-    @RequestMapping("/payment")
+    @Operation(
+            summary = "Crear una nueva referencia de pago",
+            description = "Crea una referencia de pago en el sistema con la información proporcionada en el cuerpo de la solicitud."
+    )
+    @PostMapping("/payment")
     public ResponseEntity<ApiResponse<PaymentCreateResponse>> create(@Valid @RequestBody PaymentCreateRequest request) {
         PaymentReference entity = mapper.toEntity(request);
         PaymentReference saved = service.create(entity);
@@ -51,6 +56,10 @@ public class PaymentReferenceController {
         return ResponseEntity.status(201).body(apiResponse);
     }
 
+    @Operation(
+            summary = "Consultar una referencia de pago",
+            description = "Obtiene la información completa de una referencia de pago a partir de su referencia y ID de pago."
+    )
     @GetMapping("/payment/{reference}/{paymentId}")
     public ResponseEntity<ApiResponse<PaymentReferenceResponse>> findById(@PathVariable String reference, @PathVariable Long paymentId) {
         Optional<PaymentReferenceResponse> optResponse = service.findByPaymentIdAndReference(reference, paymentId)
@@ -67,9 +76,11 @@ public class PaymentReferenceController {
         return ResponseEntity.ok(response);
     }
 
-
-    @GetMapping
-    @RequestMapping("/payments/search")
+    @Operation(
+            summary = "Listar referencias de pago",
+            description = "Devuelve todas las referencias de pago creadas entre dos fechas dadas y filtradas por estado."
+    )
+    @GetMapping("/payments/search")
     public ResponseEntity<ApiResponse<List<PaymentReferenceResponse>>> findAll(
             @RequestParam("startCreationDate") String startCreationDate,
             @RequestParam("endCreationDate") String endCreationDate,
@@ -89,7 +100,10 @@ public class PaymentReferenceController {
         return ResponseEntity.ok(response);
     }
 
-
+    @Operation(
+            summary = "Cancelar una referencia de pago",
+            description = "Actualiza el estado de una referencia de pago existente a 'Cancelado (03)'."
+    )
     @PutMapping("/payment/cancel")
     public ResponseEntity<ApiResponse<PaymentUpdateResponse>> update(@Valid @RequestBody PaymentCancelRequest request) {
 
@@ -105,20 +119,21 @@ public class PaymentReferenceController {
         return ResponseEntity.ok(response);
     }
 
-
+    @Operation(
+            summary = "Descargar comprobante PDF",
+            description = "Genera y descarga el comprobante de pago en formato PDF para una referencia específica."
+    )
     @GetMapping("/payment/{id}/pdf")
     public ResponseEntity<byte[]> downloadPdf(@PathVariable Long id) throws DocumentException {
         PaymentReference reference = service.findById(id)
                 .orElseThrow(() -> new RuntimeException("Referencia no encontrada"));
 
         try {
-            // 🧾 Crear el PDF en memoria
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             Document document = new Document();
             PdfWriter.getInstance(document, out);
             document.open();
 
-            // 🖋️ Contenido del PDF
             document.add(new Paragraph("Comprobante de Pago"));
             document.add(new Paragraph(" "));
             document.add(new Paragraph("Referencia: " + reference.getReference()));
@@ -131,7 +146,6 @@ public class PaymentReferenceController {
 
             document.close();
 
-            // 📦 Convertir a bytes
             byte[] pdfBytes = out.toByteArray();
 
             HttpHeaders headers = new HttpHeaders();

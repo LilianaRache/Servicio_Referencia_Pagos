@@ -28,10 +28,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Test unitario del controlador PaymentReferenceController.
- * Aísla completamente la lógica del controlador sin JWT ni filtros de seguridad.
- */
 class PaymentReferenceControllerTest {
 
     private MockMvc mockMvc;

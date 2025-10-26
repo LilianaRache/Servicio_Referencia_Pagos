@@ -6,9 +6,6 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * DTO de salida que representa una referencia de pago creada por el cliente.
- */
 @Getter
 @Setter
 public class PaymentCreateResponse {

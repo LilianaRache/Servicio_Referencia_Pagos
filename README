@@ -114,6 +114,24 @@ Importa el archivo en Postman y prueba todos los endpoints fácilmente 🚀
 
 --
 
+## 📚 Documentación
+
+La documentación de la API se encuentra disponible a través de Swagger UI, donde puedes visualizar y probar los endpoints de forma interactiva:
+
+🔗 http://localhost:8080/swagger-ui/index.html
+
+También puedes generar la documentación técnica del código mediante JavaDoc, utilizando cualquiera de las siguientes opciones:
+
+    -  Generar documentación con Gradle
+        ./gradlew javadoc
+
+    - O manualmente con el comando estándar de Java
+        javadoc -d doc -sourcepath src/main/java com.referencedpaymentsapi
+
+La documentación se generará en la carpeta doc/, desde donde podrás abrir el archivo index.html para navegar por las clases y métodos documentados.
+
+--
+
 ## 📄 Licencia
 
 Este proyecto fue desarrollado con fines educativos y de práctica profesional.
@@ -126,4 +144,6 @@ Este proyecto fue desarrollado con fines educativos y de práctica profesional.
 Jeimmy Liliana Rache Camargo
 Desarrolladora Backend - Java | Spring Boot
 📧 Contacto: https://github.com/LilianaRache
+
+
 

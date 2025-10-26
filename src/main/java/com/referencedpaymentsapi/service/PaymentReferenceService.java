@@ -24,9 +24,6 @@ public class PaymentReferenceService {
         this.paymentReferenceRepository = paymentReferenceRepository;
     }
 
-    /**
-     * Crea una nueva referencia de pago con un número único.
-     */
     public PaymentReference create(PaymentReference reference) {
         reference.setReference(generateReference());
         return paymentReferenceRepository.save(reference);
@@ -69,14 +66,11 @@ public class PaymentReferenceService {
      * Ejemplo: 22102025081455999SKAS82HFY57SU
      */
     private String generateReference() {
-        // 1️⃣ Timestamp con milisegundos → 17 caracteres
         String timestamp = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("ddMMyyyyHHmmssSSS"));
 
-        // 2️⃣ Parte aleatoria alfanumérica → 13 caracteres
         String randomPart = generateRandomAlphaNumeric(13);
 
-        // 3️⃣ Concatenar y asegurar longitud 30
         String reference = timestamp + randomPart;
         return reference.length() > 30 ? reference.substring(0, 30) : reference;
     }
