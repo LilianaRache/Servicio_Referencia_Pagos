@@ -43,6 +43,8 @@ Antes de iniciar la API, crea el usuario **admin** para poder generar tokens JWT
 
 Ejecuta en tu base de datos PostgreSQL:
 
+docker exec -it referenced-payments-db psql -U pagos_user referenced_payments
+
 ```sql
 INSERT INTO users (id, username, password, role)
 VALUES (1, 'admin', '$2a$10$y4JGVByR76/yduFxf5EBS.g/e4HOlWO9VZxk01iM2gyX5TA/Houg2', 'ADMIN');

@@ -15,7 +15,7 @@ services:
     networks:
       - referenced-network
 
-  app:
+  apiback:
     build: .
     container_name: referenced-payments-api
     restart: on-failure
