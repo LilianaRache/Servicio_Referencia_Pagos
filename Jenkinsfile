@@ -54,7 +54,7 @@ pipeline {
                 sh '''
                 echo "Esperando 5s para que el API arranque..."
                 sleep 5
-                curl -f http://referenced-payments-api:8080/actuator/health || curl -f http://localhost:8080/actuator/health
+                curl -f http://referenced-payments-api:8080/v1/health || curl -f http://localhost:8080/v1/health
                 '''
             }
         }
