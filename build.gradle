@@ -16,6 +16,10 @@ java {
     }
 }
 
+jacoco {
+    toolVersion = "0.8.10"
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -63,11 +67,17 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+tasks.test {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
 jacocoTestReport {
     dependsOn test
     reports {
         xml.required = true
-        html.required = true
+        html.required = false
+        csv.required = false
     }
 }
 

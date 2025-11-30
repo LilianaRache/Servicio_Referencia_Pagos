@@ -22,16 +22,18 @@ pipeline {
             }
         }
 
-        stage('Test') {
+        stage('Upload coverage to Codecov') {
             steps {
-                sh './gradlew test'
-            }
-            post {
-                always {
-                    junit '**/build/test-results/test/*.xml'
+                withCredentials([string(credentialsId: 'CODECOV_TOKEN', variable: 'CODECOV_TOKEN')]) {
+                    sh '''
+                        curl -Os https://uploader.codecov.io/latest/linux/codecov
+                        chmod +x codecov
+                        ./codecov -f build/reports/jacoco/test/jacocoTestReport.xml -t $CODECOV_TOKEN
+                    '''
                 }
             }
         }
+
 
         stage('Docker Build') {
             steps {
@@ -50,7 +52,6 @@ pipeline {
 
         stage('Smoke Tests') {
             steps {
-                // prueba rápida para validar que el API responde
                 sh '''
                 echo "Esperando 5s para que el API arranque..."
                 sleep 5
