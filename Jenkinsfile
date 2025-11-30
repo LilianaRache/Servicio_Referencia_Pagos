@@ -42,10 +42,11 @@ pipeline {
 
         stage('Run Docker Compose') {
             steps {
-                sh "docker-compose -f ${COMPOSE_FILE} down || true"
-                sh "docker-compose -f ${COMPOSE_FILE} up -d --remove-orphans"
+                sh "docker compose -f ci/docker-compose.ci.yml down || true"
+                sh "docker compose -f ci/docker-compose.ci.yml up -d --remove-orphans"
             }
         }
+
 
         stage('Smoke Tests') {
             steps {

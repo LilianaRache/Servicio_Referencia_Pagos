@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:14
+    container_name: referenced-payments-db-ci
+    environment:
+      POSTGRES_USER: pagos_user
+      POSTGRES_PASSWORD: pagos_pass
+      POSTGRES_DB: referenced_payments
+    ports:
+      - "5433:5432"   # PUERTO DIFERENTE AL LOCAL
+    networks:
+      - app-network-ci
+
+  apiback:
+    image: referenced-payments-api:latest
+    container_name: referenced-payments-api-ci
+    depends_on:
+      - db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/referenced_payments
+      SPRING_DATASOURCE_USERNAME: pagos_user
+      SPRING_DATASOURCE_PASSWORD: pagos_pass
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - app-network-ci
+
+networks:
+  app-network-ci:
+    driver: bridge
