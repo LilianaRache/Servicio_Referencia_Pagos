@@ -7,6 +7,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -17,14 +18,41 @@ pipeline {
 
         stage('Build') {
             steps {
-                // usa gradle wrapper
                 sh './gradlew clean build -x test'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh './gradlew test jacocoTestReport'
+            }
+            post {
+                always {
+                    junit '**/build/test-results/test/*.xml'
+                }
+            }
+        }
+
+        stage('Debug Jacoco') {
+            steps {
+                sh 'ls -R build || true'
+            }
+        }
+
+        stage('Upload coverage to Codecov') {
+            steps {
+                withCredentials([string(credentialsId: 'CODECOV_TOKEN', variable: 'CODECOV_TOKEN')]) {
+                    sh '''
+                        curl -Os https://uploader.codecov.io/latest/linux/codecov
+                        chmod +x codecov
+                        ./codecov -f build/reports/jacoco/test/jacocoTestReport.xml -t $CODECOV_TOKEN
+                    '''
+                }
             }
         }
 
         stage('Docker Build') {
             steps {
-                // construye la imagen usando el docker del host (por el socket montado)
                 sh "docker build -t ${IMAGE_NAME}:latest ."
             }
         }
@@ -36,26 +64,12 @@ pipeline {
             }
         }
 
-
         stage('Smoke Tests') {
             steps {
                 sh '''
                 echo "Esperando 5s para que el API arranque..."
                 sleep 5
                 curl -f http://referenced-payments-api:8080/v1/health || curl -f http://localhost:8080/v1/health
-                '''
-            }
-        }
-
-        stage('Upload coverage to Codecov') {
-            environment {
-                CODECOV_TOKEN = credentials('CODECOV_TOKEN')
-            }
-            steps {
-                sh '''
-                    curl -Os https://uploader.codecov.io/latest/linux/codecov
-                    chmod +x codecov
-                    ./codecov -t $CODECOV_TOKEN -f build/reports/jacoco/test/jacocoTestReport.xml
                 '''
             }
         }
