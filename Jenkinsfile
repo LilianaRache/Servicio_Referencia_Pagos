@@ -42,7 +42,7 @@ pipeline {
 
         stage('Run Docker Compose') {
             steps {
-                // forzar recreate para aplicar nueva imagen
+                sh "docker-compose -f ${COMPOSE_FILE} down || true"
                 sh "docker-compose -f ${COMPOSE_FILE} up -d --remove-orphans"
             }
         }
