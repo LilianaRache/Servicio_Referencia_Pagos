@@ -42,8 +42,8 @@ pipeline {
 
         stage('Run Docker Compose') {
             steps {
-                sh "docker compose -f ci/docker-compose.ci.yml down || true"
-                sh "docker compose -f ci/docker-compose.ci.yml up -d --remove-orphans"
+                sh "docker-compose -f ci/docker-compose.ci.yml down || true"
+                sh "docker-compose -f ci/docker-compose.ci.yml up -d --remove-orphans"
             }
         }
 
