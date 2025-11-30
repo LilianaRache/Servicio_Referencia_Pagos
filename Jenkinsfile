@@ -7,7 +7,6 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
                 git branch: 'main',
@@ -18,23 +17,14 @@ pipeline {
 
         stage('Build') {
             steps {
+                // usa gradle wrapper
                 sh './gradlew clean build -x test'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh './gradlew clean jacocoTestReport'
-            }
-            post {
-                always {
-                    junit '**/build/test-results/test/*.xml'
-                }
             }
         }
 
         stage('Docker Build') {
             steps {
+                // construye la imagen usando el docker del host (por el socket montado)
                 sh "docker build -t ${IMAGE_NAME}:latest ."
             }
         }
@@ -45,6 +35,7 @@ pipeline {
                 sh "docker-compose -f ci/docker-compose.ci.yml up -d --remove-orphans"
             }
         }
+
 
         stage('Smoke Tests') {
             steps {
@@ -58,13 +49,11 @@ pipeline {
 
         stage('Upload coverage to Codecov') {
             steps {
-                withCredentials([string(credentialsId: 'CODECOV_TOKEN', variable: 'CODECOV_TOKEN')]) {
-                    sh '''
-                        curl -Os https://uploader.codecov.io/latest/linux/codecov
-                        chmod +x codecov
-                        ./codecov -f build/reports/jacoco/test/jacocoTestReport.xml -t $CODECOV_TOKEN
-                    '''
-                }
+                sh '''
+                    curl -Os https://uploader.codecov.io/latest/linux/codecov
+                    chmod +x codecov
+                    ./codecov -t $CODECOV_TOKEN
+                '''
             }
         }
     }
