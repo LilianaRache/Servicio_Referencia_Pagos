@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "referenced-payments-api"
-        COMPOSE_FILE = "docker-compose.yml"
+        COMPOSE_FILE = "ci/docker-compose.ci.yml"
     }
 
     stages {
@@ -33,12 +33,6 @@ pipeline {
             }
         }
 
-        stage('Debug Jacoco') {
-            steps {
-                sh 'ls -R build || true'
-            }
-        }
-
         stage('Upload coverage to Codecov') {
             steps {
                 withCredentials([string(credentialsId: 'CODECOV_TOKEN', variable: 'CODECOV_TOKEN')]) {
@@ -59,8 +53,8 @@ pipeline {
 
         stage('Run Docker Compose') {
             steps {
-                sh "docker-compose -f ci/docker-compose.ci.yml down || true"
-                sh "docker-compose -f ci/docker-compose.ci.yml up -d --remove-orphans"
+                sh "docker-compose -f ${COMPOSE_FILE} down || true"
+                sh "docker-compose -f ${COMPOSE_FILE} up -d --remove-orphans"
             }
         }
 
