@@ -30,7 +30,7 @@ services:
       - app-network
 
   apiback:
-    build: .
+    image: referenced-payments-api:latest
     container_name: referenced-payments-api
     restart: on-failure
     ports:
