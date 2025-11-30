@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME = "referenced-payments-api"
-        COMPOSE_FILE = "docker-compose-backend.yml"
+        COMPOSE_FILE = "docker-compose.yml"
     }
 
     stages {
