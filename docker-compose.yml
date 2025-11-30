@@ -14,7 +14,7 @@ services:
     environment:
       - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
     networks:
-      - referenced-network
+      - app-network
 
   db:
     image: postgres:14
@@ -29,7 +29,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - referenced-network
+      - app-network
 
   apiback:
     build: .
@@ -47,12 +47,12 @@ services:
       SPRING_JPA_SHOW_SQL: true
       SPRING_PROFILES_ACTIVE: docker
     networks:
-      - referenced-network
+      - app-network
 
 volumes:
   jenkins_home:
   pgdata:
 
 networks:
-  referenced-network:
-    driver: bridge
+  app-network:
+    external: true
